@@ -24,6 +24,10 @@ class App extends Component {
 		number: PropTypes.string,
 	};
 
+	componentDidMount = () => {};
+
+	componentDidUpdate = () => {};
+
 	handlerOnChange = ({ target }) => {
 		this.setState({
 			[target.name]: target.value,
