@@ -13,6 +13,7 @@ class App extends Component {
 		searchItem: '',
 		page: 1,
 		isModalShow: false,
+		isNewSearch: false,
 		bigImgShow: '',
 	};
 
@@ -21,7 +22,11 @@ class App extends Component {
 	};
 
 	handlerChangeSearchValue = value => {
-		this.setState({ searchItem: value, page: 1 });
+		this.setState({ searchItem: value, isNewSearch: true });
+	};
+
+	handlerSearchComplete = value => {
+		this.setState({ isNewSearch: false });
 	};
 
 	handleClick = bigImageSrc => {
@@ -33,7 +38,7 @@ class App extends Component {
 	};
 
 	render() {
-		const { isModalShow, searchItem, page, bigImgShow } = this.state;
+		const { isModalShow, searchItem, page, isNewSearch, bigImgShow } = this.state;
 		return (
 			<div className='container'>
 				{isModalShow && (
@@ -45,7 +50,9 @@ class App extends Component {
 				<ImageGallery
 					searchItem={searchItem}
 					pageStart={page}
+					isNewSearch={isNewSearch}
 					onClickBigImage={this.handleClick}
+					onSearchCompeted={this.handlerSearchComplete}
 				/>
 			</div>
 		);

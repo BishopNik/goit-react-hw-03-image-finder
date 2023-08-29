@@ -22,13 +22,13 @@ class Searchbar extends Component {
 	};
 
 	handerlOnChange = ({ target }) => {
-		this.setState({ value: target.value });
+		this.setState({ value: target.value.trim() });
 	};
 
 	render() {
 		return (
 			<form className='searbar-container' onSubmit={this.handlerOnSubmit}>
-				<Button type={'submit'} class={'button-search'}>
+				<Button type={'submit'} className={'button-search'}>
 					<GoSearch className='icon' />
 				</Button>
 				<input

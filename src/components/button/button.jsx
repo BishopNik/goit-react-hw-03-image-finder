@@ -5,19 +5,16 @@ import PropTypes from 'prop-types';
 
 class Button extends Component {
 	static propTypes = {
-		class: PropTypes.string.isRequired,
+		class: PropTypes.string,
 		type: PropTypes.string.isRequired,
 		children: PropTypes.node.isRequired,
 	};
 
 	render() {
+		const { className, type, onClick, children } = this.props;
 		return (
-			<button
-				className={this.props.class}
-				type={this.props.type}
-				onClick={this.props.onClick}
-			>
-				{this.props.children}
+			<button className={className} type={type} onClick={onClick}>
+				{children}
 			</button>
 		);
 	}

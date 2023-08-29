@@ -2,16 +2,24 @@
 
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import {
+	BsFillSkipForwardFill,
+	BsFillSkipBackwardFill,
+	BsArrowRightSquareFill,
+	BsArrowLeftSquareFill,
+} from 'react-icons/bs';
 import { Notify } from 'notiflix';
 import { fetchImage } from '../service/fetch_api';
 import ImageItem from '../galleryitem';
 import Button from '../button';
 import Loader from '../loader';
+import { ErrorComponent } from 'components/service/error';
 import './style.css';
 
 class ImageGallery extends Component {
 	state = {
 		searchItem: '',
+		value: '',
 		page: 1,
 		perPage: 12,
 		foundImages: [],
@@ -24,20 +32,21 @@ class ImageGallery extends Component {
 
 	static propTypes = {
 		searchItem: PropTypes.string.isRequired,
+		isNewSearch: PropTypes.bool.isRequired,
 		pageStart: PropTypes.number.isRequired,
 		onClickBigImage: PropTypes.func.isRequired,
-	};
-
-	addPage = () => {
-		this.setState(prevState => ({
-			page: prevState.page + 1,
-		}));
+		onSearchCompeted: PropTypes.func.isRequired,
 	};
 
 	componentDidUpdate = (prevProps, prevState) => {
 		const { page, perPage, countPage } = this.state;
-		const { searchItem, pageStart } = this.props;
-		if (searchItem !== prevProps.searchItem || prevState.page !== page) {
+		const { searchItem, pageStart, isNewSearch, onSearchCompeted } = this.props;
+		if (
+			prevProps.searchItem !== searchItem ||
+			prevProps.isNewSearch !== isNewSearch ||
+			prevState.page !== page ||
+			prevState.perPage !== perPage
+		) {
 			const currentPage = searchItem !== prevProps.searchItem ? pageStart : page;
 			this.setState({
 				statusComponent: 'pending',
@@ -63,6 +72,7 @@ class ImageGallery extends Component {
 						countFoundItem: totalHits,
 						countPage: pages,
 						statusComponent: 'resolved',
+						value: perPage,
 					}));
 				})
 				.catch(({ message }) => {
@@ -71,8 +81,20 @@ class ImageGallery extends Component {
 						error: message,
 					});
 					Notify.failure('Unable to load results. ' + message);
-				});
+				})
+				.finally(onSearchCompeted);
 		}
+	};
+
+	changePage = pg => {
+		this.setState(prevState => {
+			if (0 < prevState.page && prevState.page <= this.state.countPage) {
+				return {
+					page: prevState.page + pg,
+				};
+			}
+			return null;
+		});
 	};
 
 	handleClick = ({ target }) => {
@@ -80,8 +102,24 @@ class ImageGallery extends Component {
 		this.props.onClickBigImage(bigImageSrc);
 	};
 
+	handlerChangeCountItem = ({ target }) => {
+		this.setState({ value: target.value.trim() });
+	};
+
+	handlerSubmitCountItem = e => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			const { value } = this.state;
+			console.log(value);
+			if (value) {
+				this.setState({ perPage: parseInt(value) });
+			}
+		}
+	};
+
 	render() {
-		const { page, countPage, statusComponent, foundImages, error } = this.state;
+		const { page, countPage, searchItem, perPage, statusComponent, foundImages, error, value } =
+			this.state;
 		if (statusComponent === 'pending') {
 			return <Loader />;
 		}
@@ -101,20 +139,64 @@ class ImageGallery extends Component {
 								/>
 							))
 						) : (
-							<h2 className='error-found'>Images not found</h2>
+							<ErrorComponent>
+								Images <span className='search-item'>{searchItem}</span> not found
+							</ErrorComponent>
 						)}
 					</ul>
-					{page > 0 && page !== countPage && (
-						<Button class={'loadmore'} type={'button'} onClick={this.addPage}>
-							<span>Loadmore</span>
-						</Button>
+					{page > 0 && countPage > 0 && (
+						<div className='status-container'>
+							<div className='page-stat'>
+								<p className='page-count'>item in page:</p>
+								<input
+									type='number'
+									className='page-item'
+									value={value}
+									min={1}
+									max={perPage}
+									onChange={this.handlerChangeCountItem}
+									onKeyDown={this.handlerSubmitCountItem}
+								/>
+								<div className='page-count'>
+									page: {page} / {countPage}
+								</div>
+							</div>
+							<Button
+								className={'loadmore'}
+								type={'button'}
+								onClick={() => this.setState({ page: 1 })}
+							>
+								<BsFillSkipBackwardFill />
+							</Button>
+							<Button
+								className={'loadmore'}
+								type={'button'}
+								onClick={() => this.changePage(-1)}
+							>
+								<BsArrowLeftSquareFill />
+							</Button>
+							<Button
+								className={'loadmore'}
+								type={'button'}
+								onClick={() => this.changePage(1)}
+							>
+								<BsArrowRightSquareFill />
+							</Button>
+							<Button
+								className={'loadmore'}
+								type={'button'}
+								onClick={() => this.setState({ page: countPage })}
+							>
+								<BsFillSkipForwardFill />
+							</Button>
+						</div>
 					)}
 				</>
 			);
 		}
 
 		if (statusComponent === 'rejected') {
-			return <h2 className='error-found'>{error}</h2>;
+			return <ErrorComponent className={'error'}>{error}</ErrorComponent>;
 		}
 	}
 }
