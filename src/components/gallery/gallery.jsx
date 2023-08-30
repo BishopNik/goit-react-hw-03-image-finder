@@ -43,7 +43,7 @@ class ImageGallery extends Component {
 		const { searchItem, pageStart, isNewSearch, onSearchCompeted } = this.props;
 		if (
 			prevProps.searchItem !== searchItem ||
-			prevProps.isNewSearch !== isNewSearch ||
+			(prevProps.isNewSearch !== isNewSearch && isNewSearch === true) ||
 			prevState.page !== page ||
 			prevState.perPage !== perPage
 		) {
@@ -87,14 +87,31 @@ class ImageGallery extends Component {
 	};
 
 	changePage = pg => {
-		this.setState(prevState => {
-			if (0 < prevState.page && prevState.page <= this.state.countPage) {
-				return {
-					page: prevState.page + pg,
-				};
+		const { countPage } = this.state;
+		this.setState(
+			prevState => {
+				const newPage = prevState.page + pg;
+				if (1 <= newPage && newPage <= countPage) {
+					return {
+						page: newPage,
+					};
+				}
+				return null;
+			},
+			() => {
+				const { page, countPage } = this.state;
+				switch (page) {
+					case 1:
+						Notify.info('First page');
+						return;
+					case countPage:
+						Notify.info('Last page');
+						return;
+					default:
+						break;
+				}
 			}
-			return null;
-		});
+		);
 	};
 
 	handleClick = ({ target }) => {
@@ -164,7 +181,10 @@ class ImageGallery extends Component {
 							<Button
 								className={'loadmore'}
 								type={'button'}
-								onClick={() => this.setState({ page: 1 })}
+								onClick={() => {
+									this.setState({ page: 1 });
+									Notify.info('First page');
+								}}
 							>
 								<BsFillSkipBackwardFill />
 							</Button>
@@ -185,7 +205,10 @@ class ImageGallery extends Component {
 							<Button
 								className={'loadmore'}
 								type={'button'}
-								onClick={() => this.setState({ page: countPage })}
+								onClick={() => {
+									this.setState({ page: countPage });
+									Notify.info('Last page');
+								}}
 							>
 								<BsFillSkipForwardFill />
 							</Button>
