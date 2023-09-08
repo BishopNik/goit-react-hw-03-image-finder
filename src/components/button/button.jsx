@@ -8,6 +8,7 @@ class Button extends Component {
 		class: PropTypes.string,
 		type: PropTypes.string.isRequired,
 		children: PropTypes.node.isRequired,
+		onClick: PropTypes.func,
 	};
 
 	render() {
