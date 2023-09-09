@@ -25,7 +25,6 @@ class ImageGallery extends Component {
 		foundImages: [],
 		countFoundItem: 0,
 		countPage: 0,
-		isLoading: false,
 		statusComponent: null,
 		error: null,
 	};
@@ -51,11 +50,11 @@ class ImageGallery extends Component {
 			this.setState({
 				statusComponent: 'pending',
 				searchItem,
-				page: currentPage,
+				page: prevState.perPage !== perPage ? 1 : currentPage,
 			});
 			fetchImage({
 				searchItem,
-				page,
+				page: prevState.perPage !== perPage ? 1 : page,
 				perPage,
 			})
 				.then(({ hits, totalHits }) => {
@@ -127,7 +126,6 @@ class ImageGallery extends Component {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			const { value } = this.state;
-			console.log(value);
 			if (value) {
 				this.setState({ perPage: parseInt(value) });
 			}
@@ -135,8 +133,16 @@ class ImageGallery extends Component {
 	};
 
 	render() {
-		const { page, countPage, searchItem, perPage, statusComponent, foundImages, error, value } =
-			this.state;
+		const {
+			page,
+			countPage,
+			searchItem,
+			countFoundItem,
+			statusComponent,
+			foundImages,
+			error,
+			value,
+		} = this.state;
 		if (statusComponent === 'pending') {
 			return <Loader />;
 		}
@@ -170,7 +176,7 @@ class ImageGallery extends Component {
 									className='page-item'
 									value={value}
 									min={1}
-									max={perPage}
+									max={countFoundItem >= 200 ? 200 : countFoundItem}
 									onChange={this.handlerChangeCountItem}
 									onKeyDown={this.handlerSubmitCountItem}
 								/>
