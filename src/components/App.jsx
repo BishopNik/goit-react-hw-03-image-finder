@@ -3,7 +3,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import Searchbar from './searchbar';
-import ImageGallery from './gallery';
+import Gallery from './gallery';
 import Modal from './modal';
 
 import './style.css';
@@ -47,7 +47,7 @@ class App extends Component {
 					</Modal>
 				)}
 				<Searchbar handlerSearch={this.handlerChangeSearchValue} />
-				<ImageGallery
+				<Gallery
 					searchItem={searchItem}
 					pageStart={page}
 					isNewSearch={isNewSearch}

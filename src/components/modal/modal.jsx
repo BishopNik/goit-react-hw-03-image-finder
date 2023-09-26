@@ -14,12 +14,10 @@ class Modal extends Component {
 	};
 
 	componentDidMount = () => {
-		document.addEventListener('click', this.onCloseModal);
 		document.addEventListener('keydown', this.onCloseModal);
 	};
 
 	componentWillUnmount = () => {
-		document.removeEventListener('click', this.onCloseModal);
 		document.removeEventListener('keydown', this.onCloseModal);
 	};
 
@@ -31,7 +29,7 @@ class Modal extends Component {
 
 	render() {
 		return createPortal(
-			<div className='overlay'>
+			<div className='overlay' onClick={this.onCloseModal}>
 				<div className='modal'>{this.props.children}</div>
 			</div>,
 			modalPortal

@@ -10,13 +10,13 @@ import {
 } from 'react-icons/bs';
 import { Notify } from 'notiflix';
 import { fetchImage } from '../service/fetch_api';
-import ImageItem from '../galleryitem';
+import GalleryItem from '../galleryitem';
 import Button from '../button';
 import Loader from '../loader';
 import { ErrorComponent } from 'components/service/error';
 import './style.css';
 
-class ImageGallery extends Component {
+class Gallery extends Component {
 	state = {
 		searchItem: '',
 		value: '',
@@ -153,7 +153,7 @@ class ImageGallery extends Component {
 					<ul className='gallery-container'>
 						{foundImages.length > 0 ? (
 							foundImages.map(item => (
-								<ImageItem
+								<GalleryItem
 									key={item.id}
 									srcUrl={item.webformatURL}
 									dataset={item.largeImageURL}
@@ -167,8 +167,9 @@ class ImageGallery extends Component {
 							</ErrorComponent>
 						)}
 					</ul>
-					{page > 0 && countPage > 0 && (
-						<div className='status-container'>
+
+					<div className='status-container'>
+						{page > 0 && countPage > 0 && (
 							<div className='page-stat'>
 								<p className='page-count'>item in page:</p>
 								<input
@@ -184,42 +185,50 @@ class ImageGallery extends Component {
 									page: {page} / {countPage}
 								</div>
 							</div>
-							<Button
-								className={'loadmore'}
-								type={'button'}
-								onClick={() => {
-									this.setState({ page: 1 });
-									Notify.info('First page');
-								}}
-							>
-								<BsFillSkipBackwardFill />
-							</Button>
-							<Button
-								className={'loadmore'}
-								type={'button'}
-								onClick={() => this.changePage(-1)}
-							>
-								<BsArrowLeftSquareFill />
-							</Button>
-							<Button
-								className={'loadmore'}
-								type={'button'}
-								onClick={() => this.changePage(1)}
-							>
-								<BsArrowRightSquareFill />
-							</Button>
-							<Button
-								className={'loadmore'}
-								type={'button'}
-								onClick={() => {
-									this.setState({ page: countPage });
-									Notify.info('Last page');
-								}}
-							>
-								<BsFillSkipForwardFill />
-							</Button>
-						</div>
-					)}
+						)}
+						{countPage > 1 && (
+							<>
+								<Button
+									className={'loadmore'}
+									type={'button'}
+									onClick={() => {
+										this.setState({ page: 1 });
+										Notify.info('First page');
+									}}
+								>
+									<BsFillSkipBackwardFill />
+								</Button>
+								<Button
+									className={'loadmore'}
+									type={'button'}
+									onClick={() => this.changePage(-1)}
+								>
+									<BsArrowLeftSquareFill />
+								</Button>
+								{page !== countPage && (
+									<>
+										<Button
+											className={'loadmore'}
+											type={'button'}
+											onClick={() => this.changePage(1)}
+										>
+											<BsArrowRightSquareFill />
+										</Button>
+										<Button
+											className={'loadmore'}
+											type={'button'}
+											onClick={() => {
+												this.setState({ page: countPage });
+												Notify.info('Last page');
+											}}
+										>
+											<BsFillSkipForwardFill />
+										</Button>
+									</>
+								)}
+							</>
+						)}
+					</div>
 				</>
 			);
 		}
@@ -230,4 +239,4 @@ class ImageGallery extends Component {
 	}
 }
 
-export default ImageGallery;
+export default Gallery;

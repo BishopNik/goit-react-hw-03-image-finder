@@ -4,7 +4,7 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import './style.css';
 
-class ImageItem extends Component {
+class GalleryItem extends Component {
 	static propTypes = {
 		srcUrl: PropTypes.string.isRequired,
 		tags: PropTypes.string.isRequired,
@@ -26,4 +26,4 @@ class ImageItem extends Component {
 	}
 }
 
-export default ImageItem;
+export default GalleryItem;
