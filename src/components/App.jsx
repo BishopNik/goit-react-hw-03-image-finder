@@ -8,6 +8,7 @@ import {
 	BsArrowLeftSquareFill,
 } from 'react-icons/bs';
 import { Notify } from 'notiflix';
+import { nanoid } from 'nanoid';
 import { fetchImage } from './service/fetch_api';
 import Button from './button';
 import Loader from './loader';
@@ -15,16 +16,16 @@ import Searchbar from './searchbar';
 import Gallery from './gallery';
 import Modal from './modal';
 import { ErrorComponent } from './service/error';
-
 import './style.css';
-import './gallery/style.css';
+
+var debounce = require('debounce');
 
 class App extends Component {
 	state = {
 		searchItem: '',
 		page: 1,
 		isModalShow: false,
-		isNewSearch: false,
+		isSearch: null,
 		pageStart: 1,
 		bigImgShow: '',
 		value: '',
@@ -34,13 +35,14 @@ class App extends Component {
 		countPage: 0,
 		statusComponent: null,
 		error: null,
+		idChange: null,
 	};
 
 	componentDidUpdate = (prevProps, prevState) => {
-		const { page, perPage, countPage, searchItem, isNewSearch, pageStart } = this.state;
+		const { page, perPage, countPage, searchItem, isSearch, pageStart } = this.state;
 		if (
 			prevState.searchItem !== searchItem ||
-			(prevState.isNewSearch !== isNewSearch && isNewSearch === true) ||
+			prevState.isSearch !== isSearch ||
 			prevState.page !== page ||
 			prevState.perPage !== perPage
 		) {
@@ -78,8 +80,7 @@ class App extends Component {
 						error: message,
 					});
 					Notify.failure('Unable to load results. ' + message);
-				})
-				.finally(this.handlerSearchComplete());
+				});
 		}
 	};
 
@@ -112,11 +113,7 @@ class App extends Component {
 	};
 
 	handlerChangeSearchValue = value => {
-		this.setState({ searchItem: value, isNewSearch: true, pageStart: 1 });
-	};
-
-	handlerSearchComplete = value => {
-		this.setState({ isNewSearch: false });
+		this.setState({ searchItem: value, isSearch: nanoid(), pageStart: 1, foundImages: [] });
 	};
 
 	handleClick = bigImageSrc => {
@@ -127,19 +124,28 @@ class App extends Component {
 		this.setState(({ isModalShow }) => ({ isModalShow: !isModalShow }));
 	};
 
+	changePerPage = val => {
+		if (val) {
+			this.setState({ perPage: parseInt(val) });
+		}
+	};
+
 	handlerChangeCountItem = ({ target }) => {
 		this.setState({ value: target.value.trim() });
 	};
 
-	handlerSubmitCountItem = e => {
+	handlerSubmitCountItem = debounce(e => {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			const { value } = this.state;
 			if (value) {
-				this.setState({ perPage: parseInt(value) });
+				this.changePerPage(e.target.value.trim());
 			}
+			return;
 		}
-	};
+
+		this.changePerPage(e.target.value.trim());
+	}, 1000);
 
 	render() {
 		const {
@@ -179,9 +185,10 @@ class App extends Component {
 												type='number'
 												className='page-item'
 												value={value}
-												min={1}
+												min={3}
 												max={countFoundItem >= 200 ? 200 : countFoundItem}
-												onChange={this.handlerChangeCountItem}
+												onInput={this.handlerChangeCountItem}
+												onChange={this.handlerSubmitCountItem}
 												onKeyDown={this.handlerSubmitCountItem}
 											/>
 											<div className='page-count'>
